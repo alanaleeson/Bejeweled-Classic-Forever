@@ -1592,15 +1592,7 @@ function Bejeweled:LoadAchievementEvents()
         end);
     end
     if not o.gainFun7 then
-        if ConfirmReadyCheck then
-            pcall(hooksecurefunc, "ConfirmReadyCheck", function(t)
-                if not o.gainFun7 then
-                    if (t) then
-                        skillTrigger = Bejeweled.skillBar:CheckSkill(Bejeweled.const.SKILLTYPE_FUN, Bejeweled.const.SKILL_FUNRANK3B);
-                    end
-                end
-            end);
-        end
+        -- ConfirmReadyCheck hook removed to prevent UI taint
     end
     if not o.gainFun8 then
         t:AddEvent("COMBAT_LOG_EVENT_UNFILTERED", function(t, t, ...)
@@ -8208,9 +8200,7 @@ local function k()
     -- end
 	
     -- TakeTaxiNode hook omitted to prevent taint
-    if TaxiNodeOnButtonEnter then
-        pcall(hooksecurefunc, "TaxiNodeOnButtonEnter", y)
-    end
+    -- TaxiNode hook removed to prevent UI taint
     v = x(1378301, 4)
     local x = A()
     local r = g()
