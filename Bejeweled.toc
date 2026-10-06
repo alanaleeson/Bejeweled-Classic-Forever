@@ -1,4 +1,8 @@
-## Interface: 110200, 120005, 11506, 50504, 40402, 16001, 30403
+## Interface: 16001
+## Interface-Mainline: 120100
+## Interface-Classic: 11509
+## Interface-TBC: 20506
+## Interface-Mists: 50504
 ## Title: Bejeweled
 ## Version: 11.0.0
 ## Notes: The popular game Bejeweled, for World of Warcraft!
