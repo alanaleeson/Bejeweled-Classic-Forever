@@ -88,6 +88,14 @@ function Bejeweled:SendAddonMsg(prefix, text, chatType, target)
     end
 end
 
+function Bejeweled:GetMapContinent()
+    if GetCurrentMapContinent then
+        local c = GetCurrentMapContinent()
+        if c and c > 0 then return c end
+    end
+    return 1
+end
+
 local ft = { "|cFFFFFF00" .. "Yellow", "White", "|cFF2255FF" .. "Blue", "|cFFFF0000" .. "Red", "|cFFEE00EE" .. "Purple", "|cFFFF9922" .. "Orange", "|cFF00FF00" .. "Green" }
 Bejeweled.const = {}
 Bejeweled.const.channels = { "GUILD", "PARTY", "RAID" }
@@ -1455,8 +1463,8 @@ function Bejeweled:UpdateFlightTimes()
         if (#t.pathArray > 0) then
             o = o + 1.35
         end
-        SetMapToCurrentZone()
-        local e = GetCurrentMapContinent()
+        if SetMapToCurrentZone then pcall(SetMapToCurrentZone) end
+        local e = Bejeweled:GetMapContinent()
         if (l == 0) or (math.abs(o - l) > 5) then
             BejeweledData.flightTimes[e] = BejeweledData.flightTimes[e] or {}
             BejeweledData.flightTimes[e][n] = BejeweledData.flightTimes[e][n] or {} BejeweledData.flightTimes[e][n][i] = o
@@ -1511,8 +1519,11 @@ function Bejeweled:LoadAchievementEvents()
         end
     end)
     t.AddEvent = function(t, e, n)
-        t.eventList[e] = t.eventList[e] or {} u(t.eventList[e], n)
-        t:RegisterEvent(e)
+        local ok = pcall(t.RegisterEvent, t, e)
+        if ok then
+            t.eventList[e] = t.eventList[e] or {}
+            u(t.eventList[e], n)
+        end
     end
     if not o.gainFun1 then
         t:AddEvent("COMBAT_LOG_EVENT_UNFILTERED", function(t, t, ...)
@@ -1533,11 +1544,13 @@ function Bejeweled:LoadAchievementEvents()
     if not o.gainFun2 then
         t:AddEvent("UPDATE_BATTLEFIELD_STATUS", function(t, t, ...)
             local t = 0
-            local n
-            for n = 1, MAX_BATTLEFIELD_QUEUES do
-                bgStatus = GetBattlefieldStatus(n)
-                if (bgStatus == "queued") then
-                    t = Bejeweled.skillBar:CheckSkill(Bejeweled.const.SKILLTYPE_FUN, Bejeweled.const.SKILL_FUNRANK1B);
+            if GetBattlefieldStatus then
+                local maxQueues = MAX_BATTLEFIELD_QUEUES or 3
+                for n = 1, maxQueues do
+                    bgStatus = GetBattlefieldStatus(n)
+                    if (bgStatus == "queued") then
+                        t = Bejeweled.skillBar:CheckSkill(Bejeweled.const.SKILLTYPE_FUN, Bejeweled.const.SKILL_FUNRANK1B);
+                    end
                 end
             end
             return (t ~= 0)
@@ -1667,16 +1680,18 @@ function Bejeweled:LoadAchievementEvents()
         t:AddEvent("UPDATE_BATTLEFIELD_SCORE", function(t, t, ...)
             local n = 0
             local t
-            teamName1, oldTeamRating1, newTeamRating1 = GetBattlefieldTeamInfo(0)
-            teamName2, oldTeamRating2, newTeamRating2 = GetBattlefieldTeamInfo(1)
-            if (oldTeamRating1 ~= 0) and (oldTeamRating2 ~= 0) then
-                if (teamName1 == GetArenaTeam(1)) or (teamName1 == GetArenaTeam(2)) or (teamName1 == GetArenaTeam(3)) then
-                    if (oldTeamRating1 < newTeamRating1) then
-                        t = true;
-                    end
-                elseif (teamName2 == GetArenaTeam(1)) or (teamName2 == GetArenaTeam(2)) or (teamName2 == GetArenaTeam(3)) then
-                    if (oldTeamRating2 < newTeamRating2) then
-                        t = true;
+            if GetBattlefieldTeamInfo and GetArenaTeam then
+                teamName1, oldTeamRating1, newTeamRating1 = GetBattlefieldTeamInfo(0)
+                teamName2, oldTeamRating2, newTeamRating2 = GetBattlefieldTeamInfo(1)
+                if (oldTeamRating1 and oldTeamRating2 and oldTeamRating1 ~= 0 and oldTeamRating2 ~= 0) then
+                    if (teamName1 == GetArenaTeam(1)) or (teamName1 == GetArenaTeam(2)) or (teamName1 == GetArenaTeam(3)) then
+                        if (oldTeamRating1 < newTeamRating1) then
+                            t = true;
+                        end
+                    elseif (teamName2 == GetArenaTeam(1)) or (teamName2 == GetArenaTeam(2)) or (teamName2 == GetArenaTeam(3)) then
+                        if (oldTeamRating2 < newTeamRating2) then
+                            t = true;
+                        end
                     end
                 end
             end
@@ -6361,6 +6376,7 @@ local function y(t)
         if (h > NUM_TAXI_ROUTES) then
             NUM_TAXI_ROUTES = h;
         end
+        local curContinent = Bejeweled:GetMapContinent()
         for l = 1, NUM_TAXI_ROUTES do
             if (l <= h) then
                 C = TaxiGetSrcX(i, l) * g
@@ -6371,26 +6387,26 @@ local function y(t)
                 o = string.format("%d,%d", p, f)
                 s = 0
                 if not (t[n]) then
-                    t = BejeweledData.flightTimes[GetCurrentMapContinent()]
+                    t = BejeweledData.flightTimes[curContinent]
                     if not t[n] then
                         t[n] = {};
                     end
                 end
                 if not (t[n][o]) then
-                    t = BejeweledData.flightTimes[GetCurrentMapContinent()]
+                    t = BejeweledData.flightTimes[curContinent]
                     if not t then
-                        BejeweledData.flightTimes[GetCurrentMapContinent()] = {}
-                        t = BejeweledData.flightTimes[GetCurrentMapContinent()];
+                        BejeweledData.flightTimes[curContinent] = {}
+                        t = BejeweledData.flightTimes[curContinent];
                     end
                     if not (t[n]) then
-                        t = BejeweledData.flightTimes[GetCurrentMapContinent()]
+                        t = BejeweledData.flightTimes[curContinent]
                         if not t[n] then
                             t[n] = {};
                         end
                     end
                 end
                 if (t == ge) then
-                    local e = BejeweledData.flightTimes[GetCurrentMapContinent()]
+                    local e = BejeweledData.flightTimes[curContinent]
                     if (e) then
                         if (e[n]) then
                             if (e[n][o]) then
@@ -7894,8 +7910,10 @@ function Bejeweled:Initialize_OptionsScreen()
         end
     end)
     i.keybindButton = l
-    if (BejeweledProfile.settings.keybinding) then
-        SetOverrideBindingClick(i, true, BejeweledProfile.settings.keybinding, "BejeweledShowHideButton");
+    if (BejeweledProfile.settings.keybinding and SetOverrideBindingClick) then
+        if not (InCombatLockdown and InCombatLockdown()) then
+            pcall(SetOverrideBindingClick, i, true, BejeweledProfile.settings.keybinding, "BejeweledShowHideButton")
+        end
     end
     Bejeweled:CreateSlider(50, -a - 45, 250, "Game Transparency", "gameAlpha", o, .2, 1, .005, true, function(t)
         Bejeweled.const.windowFadeIn.endAlpha = BejeweledProfile.settings.gameAlpha
@@ -8061,7 +8079,9 @@ function Bejeweled:Initialize_OptionsScreen()
             frame.keybindButton:SetText(frame.newKeybindButton)
             frame.keybindButton:UnlockHighlight()
             frame.keybindButton.savedText = nil
-            SetOverrideBindingClick(frame, true, frame.newKeybindButton, "BejeweledShowHideButton")
+            if SetOverrideBindingClick and not (InCombatLockdown and InCombatLockdown()) then
+                pcall(SetOverrideBindingClick, frame, true, frame.newKeybindButton, "BejeweledShowHideButton")
+            end
             BejeweledProfile.settings.keybinding = frame.newKeybindButton;
         end
     end);
