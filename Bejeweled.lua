@@ -5251,7 +5251,7 @@ local function O()
         if (t.mouseOverElapsed > .5) and (BejeweledData.legalDisplayed) then
             t.mouseOverElapsed = 0
             if t.mouseOver and not Bejeweled.window.hiding then
-                if not MouseIsOver(Bejeweled.window.mouseBounds) then
+                if not (Bejeweled.window.mouseBounds and Bejeweled.window.mouseBounds.IsMouseOver and Bejeweled.window.mouseBounds:IsMouseOver()) then
                     if not Bejeweled.window.resizing then
                         t.waitMouseOver = nil
                         Bejeweled.const.windowFadeOut.fadeTimer = 0
@@ -5266,7 +5266,7 @@ local function O()
                 end
             end
             if (t.waitMouseOver) then
-                if MouseIsOver(Bejeweled.window.mouseBounds) then
+                if (Bejeweled.window.mouseBounds and Bejeweled.window.mouseBounds.IsMouseOver and Bejeweled.window.mouseBounds:IsMouseOver()) then
                     Bejeweled.window.mouseOverScreen:Hide()
                     t.waitMouseOver = nil
                     t.mouseOver = true;
@@ -5406,7 +5406,7 @@ local function E()
                 end
             else
                 t:SetAlpha(BejeweledProfile.settings.mouseoffAlpha);
-                if not MouseIsOver(t) then
+                if not (t and t.IsMouseOver and t:IsMouseOver()) then
                     t.mouseOverScreen:Show()
                     Bejeweled.sound.mouseOver = nil;
                     Bejeweled.sound:Hide();
@@ -5498,7 +5498,7 @@ local function g()
     t:SetScript("OnShow", function(t)
         Bejeweled.isShown = true
         Bejeweled.window:SetAlpha(BejeweledProfile.settings.gameAlpha)
-        if not MouseIsOver(Bejeweled.window) then
+        if not (Bejeweled.window and Bejeweled.window.IsMouseOver and Bejeweled.window:IsMouseOver()) then
             Bejeweled.sound.waitMouseOver = true
             Bejeweled.sound.mouseOver = nil
         else
