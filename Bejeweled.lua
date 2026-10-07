@@ -1519,6 +1519,9 @@ function Bejeweled:LoadAchievementEvents()
         end
     end)
     t.AddEvent = function(t, e, n)
+        if e == "COMBAT_LOG_EVENT_UNFILTERED" then
+            return
+        end
         local ok = pcall(t.RegisterEvent, t, e)
         if ok then
             t.eventList[e] = t.eventList[e] or {}
